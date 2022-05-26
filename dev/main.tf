@@ -1,3 +1,1 @@
-module "dev" {
-  source = "../modules/"
-}
+module "dev" {}
