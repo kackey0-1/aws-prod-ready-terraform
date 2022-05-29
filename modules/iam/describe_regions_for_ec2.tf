@@ -4,18 +4,7 @@ variable "identifier" {}
 
 resource "aws_iam_role" "assume_default" {
   name = var.name
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-}
-
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      identifiers = [var.identifier]
-      type = "Service"
-    }
-  }
+  assume_role_policy = var.policy
 }
 
 resource "aws_iam_policy" "default" {
