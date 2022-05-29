@@ -2,7 +2,7 @@ variable "name" {}
 variable "policy" {}
 variable "identifier" {}
 
-resource "aws_iam_role" "default" {
+resource "aws_iam_role" "assume_default" {
   name = var.name
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
@@ -25,13 +25,13 @@ resource "aws_iam_policy" "default" {
 
 resource "aws_iam_role_policy_attachment" "default" {
   policy_arn = aws_iam_policy.default.arn
-  role = aws_iam_role.default.name
+  role = aws_iam_role.assume_default.name
 }
 
 output "iam_role_arn" {
-  value = aws_iam_role.default.arn
+  value = aws_iam_role.assume_default.arn
 }
 
 output "iam_role_name" {
-  value = aws_iam_role.default.name
+  value = aws_iam_role.assume_default.name
 }
