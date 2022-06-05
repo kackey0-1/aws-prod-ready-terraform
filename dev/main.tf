@@ -1,3 +1,7 @@
+module "aws_s3_bucket" {
+  source = "../modules/s3"
+}
+
 module "describe_regions_for_ec2" {
   source = "../modules/iam"
   name = "describe_regions_for_ec2"
@@ -12,5 +16,3 @@ data "aws_iam_policy_document" "allow_describe_regions" {
     resources = ["*"]
   }
 }
-
-
