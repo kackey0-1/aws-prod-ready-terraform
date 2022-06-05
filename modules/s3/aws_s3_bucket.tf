@@ -15,7 +15,6 @@ resource "aws_s3_bucket" "private" {
 }
 
 resource "aws_s3_account_public_access_block" "private" {
-  bucket = aws_s3_bucket.private.id
   block_public_acls = true
   block_public_policy = true
   ignore_public_acls = true
@@ -28,7 +27,7 @@ resource "aws_s3_bucket" "public" {
 
   cors_rule {
     allowed_methods = ["GET"]
-    allowed_origins = ["https://static.hypo-driven.com"]
+    allowed_origins = ["*", "https://static.hypo-driven.com"]
     allowed_headers = ["*"]
     max_age_seconds = 3000
   }
