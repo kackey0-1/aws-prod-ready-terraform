@@ -14,7 +14,8 @@ resource "aws_s3_bucket" "private" {
   }
 }
 
-resource "aws_s3_account_public_access_block" "private" {
+resource "aws_s3_bucket_public_access_block" "private" {
+  bucket = aws_s3_bucket.private.id
   block_public_acls = true
   block_public_policy = true
   ignore_public_acls = true
@@ -31,12 +32,6 @@ resource "aws_s3_bucket" "public" {
     allowed_headers = ["*"]
     max_age_seconds = 3000
   }
-}
-
-resource "aws_s3_bucket_public_access_block" "public" {
-  bucket = aws_s3_bucket.public.id
-  block_public_acls   = false
-  block_public_policy = false
 }
 
 resource "aws_s3_bucket" "alb_log" {
