@@ -34,6 +34,12 @@ resource "aws_s3_bucket" "public" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "public" {
+  bucket = aws_s3_bucket.public.id
+  block_public_acls   = false
+  block_public_policy = false
+}
+
 resource "aws_s3_bucket" "alb_log" {
   bucket = "alb-log-mkpartner-terraform"
 
