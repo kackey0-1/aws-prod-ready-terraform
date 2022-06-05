@@ -1,6 +1,5 @@
 module "aws_s3_bucket" {
   source = "../modules/s3"
-  name = "aws_s3_bucket"
 }
 
 module "describe_regions_for_ec2" {
