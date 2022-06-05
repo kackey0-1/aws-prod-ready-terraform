@@ -27,7 +27,7 @@ resource "aws_s3_bucket" "public" {
 
   cors_rule {
     allowed_methods = ["GET"]
-    allowed_origins = ["https://static.hypo-driven.com"]
+    allowed_origins = ["*", "https://static.hypo-driven.com"]
     allowed_headers = ["*"]
     max_age_seconds = 3000
   }
