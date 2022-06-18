@@ -1,3 +1,15 @@
+module "aws_vpc" {
+  source = "../modules/vpc"
+}
+
+module "aws_sg" {
+  source = "../modules/security_group"
+  name = "module-sg"
+  vpc_id = module.aws_vpc
+  port = 80
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
 module "aws_s3_bucket" {
   source = "../modules/s3"
 }
