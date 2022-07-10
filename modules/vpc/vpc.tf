@@ -1,12 +1,11 @@
 variable "vpc_cidr" {}
-variable "pub_subnet_cidr_0" {}
-variable "pub_subnet_cidr_1" {}
-variable "pri_subnet_cidr_0" {}
-variable "pri_subnet_cidr_1" {}
+variable "public_subnet_cidr_az_a_0" {}
+variable "public_subnet_cidr_az_c_0" {}
+variable "private_subnet_cidr_az_a_0" {}
+variable "private_subnet_cidr_az_c_0" {}
 
 #vpc
 resource "aws_vpc" "example" {
-  #cidr_block = "10.0.0.0/16"
   cidr_block = var.vpc_cidr
   enable_dns_support = true
   enable_dns_hostnames = true
@@ -17,17 +16,15 @@ resource "aws_vpc" "example" {
 }
 
 #public subnet
-resource "aws_subnet" "public_0" {
-  #cidr_block = "10.0.1.0/24"
-  cidr_block = var.pub_subnet_cidr_0
+resource "aws_subnet" "public_az_a_0" {
+  cidr_block = var.public_subnet_cidr_az_a_0
   vpc_id = aws_vpc.example.id
   map_public_ip_on_launch = true
   availability_zone = "ap-northeast-1a"
 }
 
-resource "aws_subnet" "public_1" {
-  #cidr_block = "10.0.2.0/24"
-  cidr_block = var.pub_subnet_cidr_1
+resource "aws_subnet" "public_az_c_0" {
+  cidr_block = var.public_subnet_cidr_az_c_0
   vpc_id = aws_vpc.example.id
   availability_zone = "ap-northeast-1c"
   map_public_ip_on_launch = true
@@ -49,62 +46,60 @@ resource "aws_route" "public" {
   destination_cidr_block = "0.0.0.0/0"
 }
 
-resource "aws_route_table_association" "public_0" {
+resource "aws_route_table_association" "public_az_a_0" {
   route_table_id = aws_route_table.public.id
-  subnet_id = aws_subnet.public_0.id
+  subnet_id = aws_subnet.public_az_a_0.id
 }
 
-resource "aws_route_table_association" "public_1" {
+resource "aws_route_table_association" "public_az_c_0" {
   route_table_id = aws_route_table.public.id
-  subnet_id = aws_subnet.public_1.id
+  subnet_id = aws_subnet.public_az_c_0.id
 }
 
 #private subnet
-resource "aws_subnet" "private_0" {
-  #cidr_block = "10.0.65.0/24"
-  cidr_block = var.pri_subnet_cidr_0
+resource "aws_subnet" "private_az_a_0" {
+  cidr_block = var.private_subnet_cidr_az_a_0
   vpc_id = aws_vpc.example.id
   availability_zone = "ap-northeast-1a"
   map_public_ip_on_launch = false
 }
 
-resource "aws_subnet" "private_1" {
-  #cidr_block = "10.0.66.0/24"
-  cidr_block = var.pri_subnet_cidr_1
+resource "aws_subnet" "private_az_c_0" {
+  cidr_block = var.private_subnet_cidr_az_c_0
   vpc_id = aws_vpc.example.id
   availability_zone = "ap-northeast-1c"
   map_public_ip_on_launch = false
 }
 
 #private routetable
-resource "aws_route_table" "private_0" {
+resource "aws_route_table" "private_az_a_0" {
   vpc_id = aws_vpc.example.id
 }
 
-resource "aws_route_table" "private_1" {
+resource "aws_route_table" "private_az_c_0" {
   vpc_id = aws_vpc.example.id
 }
 
 resource "aws_route" "private_0" {
-  route_table_id = aws_route_table.private_0.id
+  route_table_id = aws_route_table.private_az_a_0.id
   nat_gateway_id = aws_nat_gateway.nat_gateway_0.id
   destination_cidr_block = "0.0.0.0/0"
 }
 
 resource "aws_route" "private_1" {
-  route_table_id = aws_route_table.private_1.id
+  route_table_id = aws_route_table.private_az_c_0.id
   nat_gateway_id = aws_nat_gateway.nat_gateway_1.id
   destination_cidr_block = "0.0.0.0/0"
 }
 
 resource "aws_route_table_association" "private_0" {
-  route_table_id = aws_route_table.private_0.id
-  subnet_id = aws_subnet.private_0.id
+  route_table_id = aws_route_table.private_az_a_0.id
+  subnet_id = aws_subnet.private_az_a_0.id
 }
 
 resource "aws_route_table_association" "private_1" {
-  route_table_id = aws_route_table.private_1.id
-  subnet_id = aws_subnet.private_1.id
+  route_table_id = aws_route_table.private_az_c_0.id
+  subnet_id = aws_subnet.private_az_c_0.id
 }
 
 #eip
@@ -121,13 +116,13 @@ resource "aws_eip" "nat_gateway_1" {
 #natgateway
 resource "aws_nat_gateway" "nat_gateway_0" {
   allocation_id = aws_eip.nat_gateway_0.id
-  subnet_id = aws_subnet.public_0.id
+  subnet_id = aws_subnet.public_az_a_0.id
   depends_on = [aws_internet_gateway.example]
 }
 
 resource "aws_nat_gateway" "nat_gateway_1" {
   allocation_id = aws_eip.nat_gateway_1.id
-  subnet_id = aws_subnet.public_1.id
+  subnet_id = aws_subnet.public_az_c_0.id
   depends_on = [aws_internet_gateway.example]
 }
 
@@ -137,9 +132,9 @@ output "vpc_id" {
 
 output "subnet_ids" {
   value = {
-    pub_subnet_0 = aws_subnet.public_0.id
-    pub_subnet_1 = aws_subnet.public_1.id
-    pri_subnet_0 = aws_subnet.private_0.id
-    pri_subnet_1 = aws_subnet.private_1.id
+    public_subnet_0 = aws_subnet.public_az_a_0.id
+    public_subnet_1 = aws_subnet.public_az_c_0.id
+    private_subnet_0 = aws_subnet.private_az_a_0.id
+    private_subnet_1 = aws_subnet.private_az_c_0.id
   }
 }

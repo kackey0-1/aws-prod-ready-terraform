@@ -1,10 +1,10 @@
 module "aws_vpc" {
   source = "../modules/vpc"
   vpc_cidr = "10.0.0.0/16"
-  pub_subnet_cidr_0 = "10.0.1.0/24"
-  pub_subnet_cidr_1 = "10.0.2.0/24"
-  pri_subnet_cidr_0 = "10.0.65.0/24"
-  pri_subnet_cidr_1 = "10.0.66.0/24"
+  public_subnet_cidr_az_a_0 = "10.0.1.0/24"
+  public_subnet_cidr_az_c_0 = "10.0.2.0/24"
+  private_subnet_cidr_az_a_0 = "10.0.65.0/24"
+  private_subnet_cidr_az_c_0 = "10.0.66.0/24"
 }
 
 module "aws_sg" {
