@@ -26,8 +26,28 @@ resource "aws_lb_listener" "https" {
   protocol = "HTTPS"
   certificate_arn = var.aws_hypo-driven_acm_arn
   default_action {
-    type = ""
+    type = "fixed-response"
+    fixed_response {
+      content_type = "txt/plain"
+      message_body = "this is HTTPS response"
+      status_code = "200"
+    }
   }
+}
+
+resource "aws_alb_listener" "redirect_http_to_https" {
+  load_balancer_arn = aws_alb.hypo-driven.arn
+  port = 8080
+  protocol = "HTTP"
+  default_action {
+    type = "redirect"
+    redirect {
+      port = 443
+      protocol = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+
 }
 
 output "hypo-driven_alb" {

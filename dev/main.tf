@@ -55,7 +55,7 @@ module "aws_route53" {
 module "aws_acm" {
   source = "../modules/external-network/acm"
   hypo-driven_aws_domain_name = module.aws_route53.hypo-driven_aws_domain_name
-  hypo-driven_aws_zone_id = hypo-driven_aws_zone_id
+  hypo-driven_aws_zone_id = module.aws_route53.hypo-driven_aws_zone_id
 }
 
 module "describe_regions_for_ec2" {
