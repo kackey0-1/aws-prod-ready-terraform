@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "private" {
-  bucket = "private-mkpartner-terraform"
+  bucket = "private-hypo-driven-terraform"
 
   versioning {
     enabled = true
@@ -23,7 +23,7 @@ resource "aws_s3_bucket_public_access_block" "private" {
 }
 
 resource "aws_s3_bucket" "public" {
-  bucket = "public-mkpartner-terraform"
+  bucket = "public-hypo-driven-terraform"
   acl = "public-read"
 
   cors_rule {
@@ -35,7 +35,7 @@ resource "aws_s3_bucket" "public" {
 }
 
 resource "aws_s3_bucket" "alb_log" {
-  bucket = "alb-log-mkpartner-terraform"
+  bucket = "alb-log-hypo-driven-terraform"
 
   lifecycle_rule {
     enabled = true
@@ -62,4 +62,8 @@ data "aws_iam_policy_document" "alb_log" {
       type = "AWS"
     }
   }
+}
+
+output "access_log_bucket_id" {
+  value = aws_s3_bucket.alb_log.id
 }
