@@ -28,7 +28,7 @@ resource "aws_lb_listener" "https" {
   default_action {
     type = "fixed-response"
     fixed_response {
-      content_type = "txt/plain"
+      content_type = "text/plain"
       message_body = "this is HTTPS response"
       status_code = "200"
     }
