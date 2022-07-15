@@ -10,7 +10,10 @@ resource "aws_alb" "hypo-driven" {
   idle_timeout                     = 60
   enable_deletion_protection       = true
   enable_cross_zone_load_balancing = true
-  subnets                          = var.public_subnets
+  subnets                          = [
+    var.public_subnets.public_subnet_0,
+    var.public_subnets.public_subnet_1
+  ]
 
   access_logs {
     bucket  = var.access_log_bucket_id
