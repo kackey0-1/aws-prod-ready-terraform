@@ -1,18 +1,23 @@
 resource "aws_s3_bucket" "private" {
   bucket = "private-mkpartner-terraform"
+}
 
-  versioning {
-    enabled = true
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+resource "aws_s3_bucket_server_side_encryption_configuration" "for_private" {
+  bucket = aws_s3_bucket.private.bucket
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "for_private" {
+  bucket = aws_s3_bucket.private.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 
 resource "aws_s3_bucket_public_access_block" "private" {
   bucket = aws_s3_bucket.private.id
@@ -44,13 +49,16 @@ resource "aws_s3_bucket_cors_configuration" "for_public" {
 
 resource "aws_s3_bucket" "alb_log" {
   bucket = "alb-log-mkpartner-terraform"
+}
 
-  lifecycle_rule {
-    enabled = true
-
+resource "aws_s3_bucket_lifecycle_configuration" "for_alb_log" {
+  bucket = aws_s3_bucket.alb_log.id
+  rule {
+    id = "rule-1"
     expiration {
-      days = 180
+      days = 90
     }
+    status = "Enabled"
   }
 }
 
