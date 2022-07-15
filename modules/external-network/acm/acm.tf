@@ -11,17 +11,25 @@ resource "aws_acm_certificate" "hypo-driven" {
 }
 
 # for inspection of certificate
-resource "aws_route53_record" "hypo-driven_certificate" {
-  name    = aws_acm_certificate.hypo-driven.domain_validation_options[0].resource_record_name
-  type    = aws_acm_certificate.hypo-driven.domain_validation_options[0].resource_record_type
-  records = [aws_acm_certificate.hypo-driven.domain_validation_options[0].resource_record_value]
-  zone_id = var.hypo-driven_aws_zone_id
-  ttl     = 60
+resource "aws_route53_record" "public_dns_verify" {
+  for_each = {
+    for dvo in aws_acm_certificate.hypo-driven.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = hypo-driven_aws_zone_id
 }
 
-resource "aws_acm_certificate_validation" "hypo-driven" {
+resource "aws_acm_certificate_validation" "public" {
   certificate_arn         = aws_acm_certificate.hypo-driven.arn
-  validation_record_fqdns = [aws_route53_record.hypo-driven_certificate.fqdn]
+  validation_record_fqdns = [for record in aws_route53_record.public_dns_verify : record.fqdn]
 }
 
 output "aws_hypo-driven_acm_arn" {
