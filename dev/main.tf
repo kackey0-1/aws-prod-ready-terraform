@@ -15,9 +15,9 @@
 #  cidr_blocks = ["0.0.0.0/0"]
 #}
 #
-#module "aws_s3_bucket" {
-#  source = "../modules/s3"
-#}
+module "aws_s3_bucket" {
+  source = "../modules/s3"
+}
 #
 #module "describe_regions_for_ec2" {
 #  source = "../modules/iam"

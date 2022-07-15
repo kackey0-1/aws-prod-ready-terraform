@@ -24,7 +24,15 @@ resource "aws_s3_bucket_public_access_block" "private" {
 
 resource "aws_s3_bucket" "public" {
   bucket = "public-mkpartner-terraform"
-  acl = "public-read"
+}
+
+resource "aws_s3_bucket_acl" "for_public" {
+  bucket = aws_s3_bucket.public.id
+  acl    = "public-read"
+}
+
+resource "aws_s3_bucket_cors_configuration" "for_public" {
+  bucket = aws_s3_bucket.public.bucket
 
   cors_rule {
     allowed_methods = ["GET"]
