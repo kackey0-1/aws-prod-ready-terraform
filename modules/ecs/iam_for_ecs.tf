@@ -24,7 +24,7 @@ module "ecs_event_role" {
   policy     = data.aws_iam_policy.ecs_task_execution_role_policy.policy
 }
 
-ata "aws_iam_policy" "ecs_task_execution_role_policy" {
+data "aws_iam_policy" "ecs_task_execution_role_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
 }
 
