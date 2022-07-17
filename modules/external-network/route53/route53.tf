@@ -3,7 +3,8 @@ variable "hypo-driven_alb" {}
 
 resource "aws_route53_record" "hypo-driven" {
   allow_overwrite = true
-  name    = "hypo-driven.com"
+  name    = "aws.hypo-driven.com"
+  ttl             = 172800
   type    = "NS"
   zone_id = "Z014287529AIE40PU4H85"
   records = [
