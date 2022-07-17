@@ -53,13 +53,18 @@ module "aws_route53" {
 }
 
 module "aws_acm" {
-  source = "../modules/external-network/acm"
+  source                      = "../modules/external-network/acm"
   hypo-driven_aws_domain_name = module.aws_route53.hypo-driven_aws_domain_name
-  hypo-driven_aws_zone_id = module.aws_route53.hypo-driven_aws_zone_id
+  hypo-driven_aws_zone_id     = module.aws_route53.hypo-driven_aws_zone_id
 }
 
 module "aws_kms" {
   source      = "../modules/kms"
   name        = "alias/example"
   description = "Example Customer Master Key"
+}
+
+module "ssm_parameters" {
+  source      = "../modules/ssm_parameters"
+  db_username = var.db_username
 }
