@@ -31,7 +31,7 @@ resource "aws_route53_record" "aws_hypo-driven" {
 }
 
 output "hypo-driven_aws_domain_name" {
-  value = aws_route53_record.hypo-driven.name
+  value = aws_route53_record.aws_hypo-driven.name
 }
 
 output "hypo-driven_aws_zone_id" {
