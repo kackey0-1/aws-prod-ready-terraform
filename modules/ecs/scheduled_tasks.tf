@@ -1,5 +1,3 @@
-variable "ecs_execution_role_arn" {}
-
 resource "aws_cloudwatch_log_group" "for_ecs_scheduled_task" {
   name              = "/ecs-scheduled-tasks/example"
   retention_in_days = 180
@@ -25,4 +23,5 @@ resource "aws_cloudwatch_event_target" "example-batch" {
   target_id = "example-batch"
   rule  = aws_cloudwatch_event_rule.example-batch.name
   role_arn = module.ecs_event_role.iam_role_arn
+  arn = aws_ecs_cluster.hypo-driven.arn
 }

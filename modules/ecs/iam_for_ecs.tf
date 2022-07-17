@@ -2,6 +2,7 @@ module "ecs_execution_role" {
   source     = "../iam/iam.tf"
   name       = "ecs-task-execution"
   identifier = "ecs-tasks.amazonaws.com"
+  policy = data.aws_iam_policy_document.ecs_task_execution.json
 }
 
 data "aws_iam_policy" "ecs_task_execution_role_policy" {
