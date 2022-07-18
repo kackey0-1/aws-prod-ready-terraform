@@ -12,7 +12,7 @@ resource "aws_ecs_task_definition" "example_batch" {
   memory                   = "516"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  ecs_execution_role_arn   = module.ecs_batch_execution_role.iam_role_arn
+  execution_role_arn = module.ecs_batch_execution_role.iam_role_arn
 }
 
 resource "aws_cloudwatch_event_rule" "example-batch" {
