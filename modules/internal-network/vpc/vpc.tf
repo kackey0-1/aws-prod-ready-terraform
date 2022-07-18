@@ -143,3 +143,7 @@ output "private_subnet_ids" {
     private_subnet_1 = aws_subnet.private_az_c_0.id
   }
 }
+
+output "vpc_cidr" {
+  value = aws_vpc.hypo-driven.cidr_block
+}
