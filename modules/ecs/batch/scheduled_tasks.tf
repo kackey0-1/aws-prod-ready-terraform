@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_group" "for_ecs_scheduled_task" {
 }
 
 resource "aws_ecs_task_definition" "example_batch" {
-  container_definitions    = "./json/batch_container_definitions.json"
+  container_definitions    = file("./json/batch_container_definitions.json")
   family                   = "example-batch"
   cpu                      = "256"
   memory                   = "516"
