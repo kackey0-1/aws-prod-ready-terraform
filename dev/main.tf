@@ -46,6 +46,7 @@ module "aws_alb" {
   ]
   aws_hypo-driven_acm_arn = module.aws_acm.aws_hypo-driven_acm_arn
   vpc_id = module.aws_vpc.vpc_id
+  depends_on = [module.aws_acm]
 }
 
 module "aws_route53" {
