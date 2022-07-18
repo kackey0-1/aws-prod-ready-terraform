@@ -76,6 +76,22 @@ resource "aws_lb_target_group" "target_to_ecs" {
   depends_on = [aws_alb.hypo-driven]
 }
 
+resource "aws_lb_listener_rule" "hypo-driven" {
+  listener_arn = aws_lb_listener.https.arn
+  priority = 100
+
+  action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.target_to_ecs.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+}
+
 output "hypo-driven_alb" {
   value = {
     hypo-driven_alb_name    = aws_alb.hypo-driven.dns_name
