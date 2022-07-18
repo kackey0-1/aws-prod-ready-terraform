@@ -42,7 +42,7 @@ module "ecs_batch_event_role" {
   source     = "../../iam"
   name       = "ecs-events"
   identifier = "events.amazonaws.com"
-  policy     = data.aws_iam_policy.ecs_task_execution_role_policy.policy
+  policy     = data.aws_iam_policy.ecs_event_role_policy.policy
 }
 
 data "aws_iam_policy" "ecs_task_execution_role_policy" {
@@ -58,7 +58,7 @@ data "aws_iam_policy_document" "ecs_task_execution" {
   }
 }
 
-data "aws_iam_policy" "ecs_task_execution_role_policy" {
+data "aws_iam_policy" "ecs_event_role_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
 }
 
