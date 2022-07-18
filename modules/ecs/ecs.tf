@@ -31,11 +31,14 @@ resource "aws_ecs_service" "hypo-driven" {
   network_configuration {
     assign_public_ip = false
     security_groups = [module.nginx_sg.security_group_id]
-    subnets = var.private_subnet_ids
+    subnets = [
+      var.private_subnet_ids.private_subnet_0,
+      var.private_subnet_ids.private_subnet_1
+    ]
   }
 
   load_balancer {
-    target_group_arn = var.hypo-driven_alb.ypo-driven_alb_target_group_arn
+    target_group_arn = var.hypo-driven_alb.hypo-driven_alb_target_group_arn
     container_name = "hypo-driven"
     container_port = 0
   }
@@ -50,5 +53,5 @@ module "nginx_sg" {
   name = "nginx-sg"
   vpc_id = var.vpc_id
   port = 80
-  cidr_blocks = var.vpc_cidr
+  cidr_blocks = [var.vpc_cidr]
 }
