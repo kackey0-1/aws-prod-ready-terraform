@@ -63,3 +63,8 @@
 #  name        = "alias/example"
 #  description = "Example Customer Master Key"
 #}
+
+module "ssm_parameters" {
+  source      = "../modules/ssm_parameters"
+  db_username = var.db_username
+}
