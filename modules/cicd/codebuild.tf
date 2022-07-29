@@ -1,6 +1,6 @@
-# ---------------------------------------------------------------------------------------------------------------------
+# --------------------------------
 # Code Build
-# ---------------------------------------------------------------------------------------------------------------------
+# --------------------------------
 
 data "aws_caller_identity" "current" {}
 
@@ -120,41 +120,8 @@ resource "aws_codebuild_project" "codebuild" {
     }
   }
   source {
-    type      = "CODEPIPELINE"
-    buildspec = <<BUILDSPEC
-version: 0.2
-runtime-versions:
-  java: openjdk8
-phases:
-  install:
-    runtime-versions:
-      docker: 18
-  pre_build:
-    commands:
-      - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - IMAGE_TAG=$${COMMIT_HASH:=latest}
-  build:
-    commands:
-      - echo Build started on `date`
-      - echo Building the jar
-      - ./gradlew build -x test --no-build-cache
-      - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:latest .
-      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
-  post_build:
-    commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker image...
-      - docker push $REPOSITORY_URI:latest
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
-#cache:
-#  paths:
-#    - '/root/.m2/**/*'
-artifacts:
-    files: imagedefinitions.json
-BUILDSPEC
+    type            = "CODECOMMIT"
+    location        = aws_codecommit_repository.source_repo.clone_url_http
+    git_clone_depth = 1
   }
 }
