@@ -9,6 +9,7 @@ resource "aws_ecr_repository" "default" {
     scan_on_push = true
   }
 }
+
 data "aws_ecr_repository" "image_repo" {
   name = var.image_repo_name
 

@@ -100,7 +100,8 @@ resource "aws_codepipeline" "pipeline" {
       output_artifacts = ["BuildOutput"]
       run_order        = 2
       configuration    = {
-        ProjectName = var.codebuild.id
+        ProjectName          = var.codebuild.id
+        EnvironmentVariables = "[{\"name\":\"TARGET_BRANCH\",\"value\":\"${var.target_repo_branch}\",\"type\":\"PLAINTEXT\"}]"
       }
     }
   }
