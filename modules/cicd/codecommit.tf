@@ -58,7 +58,6 @@ resource "aws_cloudwatch_event_target" "target_pipeline" {
     target_id = "${var.source_repo_name}-${var.source_repo_branch}-pipeline"
 }
 
-# Outputs
 output "source_repo_clone_url_http" {
     value = aws_codecommit_repository.source_repo.clone_url_http
 }
