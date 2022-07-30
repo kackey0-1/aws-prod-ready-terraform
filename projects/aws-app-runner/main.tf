@@ -1,11 +1,12 @@
 module "aws_cicd" {
   source                      = "../../modules/cicd"
+  image_tag_mutability        = "IMMUTABLE"
   codebuild_cache_bucket_name = var.codebuild_cache_bucket_name
   aws_region                  = var.aws_region
   family                      = var.family
   source_repo_name            = var.source_repo_name
   source_repo_branch          = var.source_repo_branch
-  image_repo_name = var.image_repo_name
+  image_repo_name             = var.image_repo_name
 }
 
 data "aws_caller_identity" "current" {}
@@ -33,17 +34,6 @@ module "apprunner_instance_role" {
   name       = "${var.apprunner-service-role}AppRunnerInstanceRole"
   identifier = "tasks.apprunner.amazonaws.com"
   policy     = data.aws_iam_policy_document.apprunner-instance-role-policy.json
-}
-
-data "aws_iam_policy_document" "apprunner-service-assume-policy" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["build.apprunner.amazonaws.com"]
-    }
-  }
 }
 
 resource "aws_iam_role_policy_attachment" "apprunner-service-role-attachment" {
