@@ -61,11 +61,6 @@ resource "aws_iam_policy" "codebuild_policy" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "codebuild-attach" {
-  role       = module.codepipeline_role.iam_role_arn
-  policy_arn = aws_iam_policy.codebuild_policy.arn
-}
-
 resource "aws_s3_bucket" "cache" {
   # workaround from https://github.com/hashicorp/terraform-provider-aws/issues/10195
   bucket        = var.codebuild_cache_bucket_name
