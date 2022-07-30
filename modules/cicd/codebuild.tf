@@ -102,7 +102,7 @@ resource "aws_codebuild_project" "codebuild" {
     }
   }
   source {
-    type            = "CODECOMMIT"
+    type            = "CODEPIPELINE"
     location        = aws_codecommit_repository.source_repo.clone_url_http
     git_clone_depth = 1
   }
