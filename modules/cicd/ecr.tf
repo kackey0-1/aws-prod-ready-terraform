@@ -15,4 +15,3 @@ data "aws_ecr_repository" "image_repo" {
         aws_ecr_repository.default
     ]
 }
-

@@ -1,10 +1,11 @@
-module "aws_ecr" {
-  source          = "../../modules/ecr"
-  image_repo_name = var.image_repo_name
-}
-
 module "aws_cicd" {
-  source = "../../modules/cicd"
+  source                      = "../../modules/cicd"
+  codebuild_cache_bucket_name = var.codebuild_cache_bucket_name
+  aws_region                  = var.aws_region
+  family                      = var.family
+  source_repo_name            = var.source_repo_name
+  source_repo_branch          = var.source_repo_branch
+  image_repo_name = var.image_repo_name
 }
 
 data "aws_caller_identity" "current" {}

@@ -1,25 +1,11 @@
 # ---------------------------------------------------------------------------------------------------------------------
 # Code Pipeline
 # ---------------------------------------------------------------------------------------------------------------------
-
-
-# Codepipeline role
-resource "aws_iam_role" "codepipeline_role" {
-    assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "codepipeline.amazonaws.com"
-      },
-      "Effect": "Allow"
-    }
-  ]
-}
-EOF
-    path               = "/"
+module "codepipeline_role" {
+  source     = "../../modules/iam"
+  name       = "codepipeline-execution"
+  identifier = "codepipeline.amazonaws.com"
+  policy     = aws_iam_policy.codepipeline_policy.policy
 }
 
 resource "aws_iam_policy" "codepipeline_policy" {
@@ -68,11 +54,6 @@ resource "aws_iam_policy" "codepipeline_policy" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "codepipeline-attach" {
-    role       = aws_iam_role.codepipeline_role.name
-    policy_arn = aws_iam_policy.codepipeline_policy.arn
-}
-
 resource "aws_s3_bucket" "artifact_bucket" {
     force_destroy = true
 }
@@ -85,7 +66,7 @@ resource "aws_codepipeline" "pipeline" {
         aws_codecommit_repository.source_repo
     ]
     name     = "${var.source_repo_name}-${var.source_repo_branch}-Pipeline"
-    role_arn = aws_iam_role.codepipeline_role.arn
+    role_arn = module.codepipeline_role.iam_role_arn
     artifact_store {
         location = aws_s3_bucket.artifact_bucket.bucket
         type     = "S3"

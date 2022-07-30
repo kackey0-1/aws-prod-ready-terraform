@@ -1,26 +1,15 @@
+variable "aws_region" {}
+variable "family" {}
 # --------------------------------
 # Code Build
 # --------------------------------
-
 data "aws_caller_identity" "current" {}
 
-# Codebuild role
-resource "aws_iam_role" "codebuild_role" {
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "codebuild.amazonaws.com"
-      },
-      "Effect": "Allow"
-    }
-  ]
-}
-EOF
-  path               = "/"
+module "codebuild_execution_role" {
+  source     = "../../modules/iam"
+  name       = "codebuild-execution"
+  identifier = "codebuild.amazonaws.com"
+  policy     = aws_iam_policy.codebuild_policy.policy
 }
 
 resource "aws_iam_policy" "codebuild_policy" {
@@ -72,7 +61,7 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "codebuild-attach" {
-  role       = aws_iam_role.codebuild_role.name
+  role       = module.codepipeline_role.iam_role_arn
   policy_arn = aws_iam_policy.codebuild_policy.arn
 }
 
@@ -89,10 +78,10 @@ resource "aws_s3_bucket" "cache" {
 resource "aws_codebuild_project" "codebuild" {
   depends_on = [
     aws_codecommit_repository.source_repo,
-    aws_ecr_repository.petclinic
+    aws_ecr_repository.default
   ]
   name         = "codebuild-${var.source_repo_name}-${var.source_repo_branch}"
-  service_role = aws_iam_role.codebuild_role.arn
+  service_role = aws_iam_role.codepipeline_role.arn
   artifacts {
     type = "CODEPIPELINE"
   }
