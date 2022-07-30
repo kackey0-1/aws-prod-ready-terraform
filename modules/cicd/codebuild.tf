@@ -8,7 +8,7 @@ data "aws_caller_identity" "current" {}
 
 module "codebuild_execution_role" {
   source     = "../../modules/iam"
-  name       = "codebuild-execution"
+  name       = "codebuildExecution"
   identifier = "codebuild.amazonaws.com"
   policy     = aws_iam_policy.codebuild_policy.policy
 }
@@ -65,9 +65,6 @@ resource "aws_iam_role_policy_attachment" "codebuild-attach" {
   role       = module.codepipeline_role.iam_role_arn
   policy_arn = aws_iam_policy.codebuild_policy.arn
 }
-
-
-# Codebuild project
 
 resource "aws_s3_bucket" "cache" {
   # workaround from https://github.com/hashicorp/terraform-provider-aws/issues/10195
