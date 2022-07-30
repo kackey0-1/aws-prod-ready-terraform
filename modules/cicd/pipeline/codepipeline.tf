@@ -1,5 +1,10 @@
-variable "source_repo_branch" {}
-variable "source_repo" {}
+variable "target_repo_branch" {}
+variable "source_repo_arn" {}
+variable "source_repo_name" {}
+variable "codebuild" {}
+variable "artifact_bucket" {}
+variable "cache_bucket" {}
+variable "aws_region" {}
 
 # --------------------------------
 # Code Pipeline
@@ -23,7 +28,7 @@ resource "aws_iam_policy" "codepipeline_policy" {
         "s3:GetBucketVersioning"
       ],
       "Effect": "Allow",
-      "Resource": "${aws_s3_bucket.artifact_bucket.arn}/*"
+      "Resource": "${var.artifact_bucket.arn}/*"
     },
     {
       "Action" : [
@@ -50,26 +55,18 @@ resource "aws_iam_policy" "codepipeline_policy" {
         "codecommit:UploadArchive"
       ],
       "Effect": "Allow",
-      "Resource": "${aws_codecommit_repository.source_repo.arn}"
+      "Resource": "${var.source_repo_arn}"
     }
   ]
 }
 EOF
 }
 
-resource "aws_s3_bucket" "artifact_bucket" {
-  force_destroy = true
-}
-
 resource "aws_codepipeline" "pipeline" {
-  depends_on = [
-    aws_codebuild_project.codebuild,
-    aws_codecommit_repository.source_repo
-  ]
-  name     = "${var.source_repo_name}-${var.source_repo_branch}-Pipeline"
+  name     = "${var.source_repo_name}-${var.target_repo_branch}-pipeline"
   role_arn = module.codepipeline_role.iam_role_arn
   artifact_store {
-    location = aws_s3_bucket.artifact_bucket.bucket
+    location = var.artifact_bucket.bucket
     type     = "S3"
   }
 
@@ -85,7 +82,7 @@ resource "aws_codepipeline" "pipeline" {
       run_order        = 1
       configuration    = {
         RepositoryName       = var.source_repo_name
-        BranchName           = var.source_repo_branch
+        BranchName           = var.target_repo_branch
         PollForSourceChanges = "false"
       }
     }
@@ -103,7 +100,7 @@ resource "aws_codepipeline" "pipeline" {
       output_artifacts = ["BuildOutput"]
       run_order        = 2
       configuration    = {
-        ProjectName = aws_codebuild_project.codebuild.id
+        ProjectName = var.codebuild.id
       }
     }
   }
@@ -140,11 +137,11 @@ resource "aws_cloudwatch_event_rule" "trigger_rule" {
 {
   "source": [ "aws.codecommit" ],
   "detail-type": [ "CodeCommit Repository State Change" ],
-  "resources": [ "${aws_codecommit_repository.source_repo.arn}" ],
+  "resources": [ "${var.source_repo_arn}" ],
   "detail": {
     "event": [ "referenceCreated", "referenceUpdated" ],
     "referenceType": [ "branch" ],
-    "referenceName": [ "${var.source_repo_branch}" ]
+    "referenceName": [ "${var.target_repo_branch}" ]
   }
 }
 PATTERN
@@ -156,7 +153,7 @@ resource "aws_cloudwatch_event_target" "target_pipeline" {
   rule      = aws_cloudwatch_event_rule.trigger_rule.name
   arn       = aws_codepipeline.pipeline.arn
   role_arn  = module.trigger_role.iam_role_arn
-  target_id = "${var.source_repo_name}-${var.source_repo_branch}-pipeline"
+  target_id = "${var.source_repo_name}-${var.target_repo_branch}-pipeline"
 }
 
 output "pipeline_url" {

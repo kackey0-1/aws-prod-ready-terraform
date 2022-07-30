@@ -1,11 +1,7 @@
-module "aws_petclinic_ecr" {
-  source               = "../../modules/cicd/ecr"
-  image_repo_name      = var.image_repo_name
-  image_tag_mutability = "MUTABLE"
-}
-
 module "aws_code_resources" {
   source                      = "../../modules/cicd/code"
+  image_repo_name             = var.image_repo_name
+  image_tag_mutability        = "MUTABLE"
   source_repo_name            = var.source_repo_name
   codebuild_cache_bucket_name = var.codebuild_cache_bucket_name
   aws_region                  = var.aws_region
@@ -14,9 +10,13 @@ module "aws_code_resources" {
 
 module "aws_cicd_for_master" {
   source             = "../../modules/cicd/pipeline"
-  source_repo        = module.aws_code_resources.source_repo
-  source_repo_branch = var.source_repo_branch # master
-
+  target_repo_branch = "master"
+  source_repo_arn    = module.aws_code_resources.source_repo_arn
+  source_repo_name   = module.aws_code_resources.source_repo_name
+  codebuild          = module.aws_code_resources.codebuild
+  artifact_bucket    = module.aws_code_resources.codebuild_s3.artifact_bucket
+  cache_bucket       = module.aws_code_resources.codebuild_s3.cache_bucket
+  aws_region         = var.aws_region
   depends_on         = [module.aws_code_resources]
 }
 

@@ -14,6 +14,17 @@ module "codebuild_execution_role" {
   policy     = aws_iam_policy.codebuild_policy.policy
 }
 
+resource "aws_s3_bucket" "artifact_bucket" {
+  force_destroy = true
+}
+
+resource "aws_s3_bucket" "cache" {
+  # workaround from https://github.com/hashicorp/terraform-provider-aws/issues/10195
+  bucket        = var.codebuild_cache_bucket_name
+  # acl    = "private"
+  force_destroy = true
+}
+
 resource "aws_iam_policy" "codebuild_policy" {
   description = "Policy to allow codebuild to execute build spec"
   policy      = <<EOF
@@ -62,19 +73,12 @@ resource "aws_iam_policy" "codebuild_policy" {
 EOF
 }
 
-resource "aws_s3_bucket" "cache" {
-  # workaround from https://github.com/hashicorp/terraform-provider-aws/issues/10195
-  bucket        = var.codebuild_cache_bucket_name
-  # acl    = "private"
-  force_destroy = true
-}
-
 resource "aws_codebuild_project" "codebuild" {
   depends_on = [
     aws_codecommit_repository.source_repo,
     aws_ecr_repository.default
   ]
-  name         = "codebuild-${var.source_repo_name}-${var.source_repo_branch}"
+  name         = "codebuild-${var.source_repo_name}"
   service_role = module.codebuild_execution_role.iam_role_arn
   artifacts {
     type = "CODEPIPELINE"
@@ -101,14 +105,21 @@ resource "aws_codebuild_project" "codebuild" {
       name  = "CONTAINER_NAME"
       value = var.family
     }
-    environment_variable {
-      name  = "CODECOMMIT_BRANCH"
-      value = var.source_repo_branch
-    }
   }
   source {
     type            = "CODEPIPELINE"
     location        = aws_codecommit_repository.source_repo.clone_url_http
     git_clone_depth = 1
   }
+}
+
+output "codebuild_s3" {
+  value = {
+    artifact_bucket = aws_s3_bucket.artifact_bucket
+    cache_bucket    = aws_s3_bucket.cache
+  }
+}
+
+output "codebuild" {
+  value = aws_codebuild_project.codebuild
 }
