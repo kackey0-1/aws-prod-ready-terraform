@@ -74,7 +74,7 @@ resource "aws_codebuild_project" "codebuild" {
     aws_ecr_repository.default
   ]
   name         = "codebuild-${var.source_repo_name}-${var.source_repo_branch}"
-  service_role = module.codepipeline_role.iam_role_arn
+  service_role = module.codebuild_execution_role.iam_role_arn
   artifacts {
     type = "CODEPIPELINE"
   }
