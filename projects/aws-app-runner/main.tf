@@ -1,12 +1,23 @@
-module "aws_cicd" {
-  source                      = "../../modules/cicd"
-  image_tag_mutability        = "IMMUTABLE"
+module "aws_code_resources" {
+  source                      = "../../modules/cicd/code"
+  image_repo_name             = var.image_repo_name
+  image_tag_mutability        = "MUTABLE"
+  source_repo_name            = var.source_repo_name
   codebuild_cache_bucket_name = var.codebuild_cache_bucket_name
   aws_region                  = var.aws_region
   family                      = var.family
-  source_repo_name            = var.source_repo_name
-  source_repo_branch          = var.source_repo_branch
-  image_repo_name             = var.image_repo_name
+}
+
+module "aws_cicd_for_master" {
+  source             = "../../modules/cicd/pipeline"
+  target_repo_branch = "master"
+  source_repo_arn    = module.aws_code_resources.source_repo_arn
+  source_repo_name   = module.aws_code_resources.source_repo_name
+  codebuild          = module.aws_code_resources.codebuild
+  artifact_bucket    = module.aws_code_resources.codebuild_s3.artifact_bucket
+  cache_bucket       = module.aws_code_resources.codebuild_s3.cache_bucket
+  aws_region         = var.aws_region
+  depends_on         = [module.aws_code_resources]
 }
 
 data "aws_caller_identity" "current" {}
