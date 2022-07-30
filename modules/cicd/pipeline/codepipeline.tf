@@ -5,7 +5,7 @@ variable "source_repo" {}
 # Code Pipeline
 # --------------------------------
 module "codepipeline_role" {
-  source     = "../../modules/iam"
+  source     = "../../iam"
   name       = "codepipeline-execution"
   identifier = "codepipeline.amazonaws.com"
   policy     = aws_iam_policy.codepipeline_policy.policy
@@ -110,7 +110,7 @@ resource "aws_codepipeline" "pipeline" {
 }
 
 module "trigger_role" {
-  source     = "../iam"
+  source     = "../../iam"
   name       = "trigger-execution"
   identifier = "events.amazonaws.com"
   policy     = aws_iam_policy.trigger_policy.policy

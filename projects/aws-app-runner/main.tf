@@ -13,9 +13,10 @@ module "aws_code_resources" {
 }
 
 module "aws_cicd_for_master" {
-  source             = "../../modules/cicd"
+  source             = "../../modules/cicd/pipeline"
   source_repo        = module.aws_code_resources.source_repo
   source_repo_branch = var.source_repo_branch # master
+
   depends_on         = [module.aws_code_resources]
 }
 
