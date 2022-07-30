@@ -8,25 +8,11 @@ resource "aws_codecommit_repository" "source_repo" {
     description     = "This is the app source repository"
 }
 
-
-# Trigger role and event rule to trigger pipeline
-resource "aws_iam_role" "trigger_role" {
-    assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "events.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-    path               = "/"
+module "trigger_role" {
+  source     = "../../modules/iam"
+  name       = "trigger-execution"
+  identifier = "events.amazonaws.com"
+  policy     = aws_iam_policy.trigger_policy.policy
 }
 
 resource "aws_iam_policy" "trigger_policy" {
@@ -47,11 +33,6 @@ resource "aws_iam_policy" "trigger_policy" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "trigger-attach" {
-    role       = aws_iam_role.trigger_role.name
-    policy_arn = aws_iam_policy.trigger_policy.arn
-}
-
 resource "aws_cloudwatch_event_rule" "trigger_rule" {
     description   = "Trigger the pipeline on change to repo/branch"
     event_pattern = <<PATTERN
@@ -66,14 +47,14 @@ resource "aws_cloudwatch_event_rule" "trigger_rule" {
   }
 }
 PATTERN
-    role_arn      = aws_iam_role.trigger_role.arn
+    role_arn      = module.trigger_role.iam_role_arn
     is_enabled    = true
 }
 
 resource "aws_cloudwatch_event_target" "target_pipeline" {
     rule      = aws_cloudwatch_event_rule.trigger_rule.name
     arn       = aws_codepipeline.pipeline.arn
-    role_arn  = aws_iam_role.trigger_role.arn
+    role_arn  = module.trigger_role.iam_role_arn
     target_id = "${var.source_repo_name}-${var.source_repo_branch}-pipeline"
 }
 
