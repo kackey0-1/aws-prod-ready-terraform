@@ -1,6 +1,9 @@
-# ---------------------------------------------------------------------------------------------------------------------
+variable "source_repo_branch" {}
+variable "source_repo" {}
+
+# --------------------------------
 # Code Pipeline
-# ---------------------------------------------------------------------------------------------------------------------
+# --------------------------------
 module "codepipeline_role" {
   source     = "../../modules/iam"
   name       = "codepipeline-execution"
@@ -9,8 +12,8 @@ module "codepipeline_role" {
 }
 
 resource "aws_iam_policy" "codepipeline_policy" {
-    description = "Policy to allow codepipeline to execute"
-    policy      = <<EOF
+  description = "Policy to allow codepipeline to execute"
+  policy      = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -55,59 +58,107 @@ EOF
 }
 
 resource "aws_s3_bucket" "artifact_bucket" {
-    force_destroy = true
+  force_destroy = true
 }
 
-# CodePipeline
-
 resource "aws_codepipeline" "pipeline" {
-    depends_on = [
-        aws_codebuild_project.codebuild,
-        aws_codecommit_repository.source_repo
-    ]
-    name     = "${var.source_repo_name}-${var.source_repo_branch}-Pipeline"
-    role_arn = module.codepipeline_role.iam_role_arn
-    artifact_store {
-        location = aws_s3_bucket.artifact_bucket.bucket
-        type     = "S3"
-    }
+  depends_on = [
+    aws_codebuild_project.codebuild,
+    aws_codecommit_repository.source_repo
+  ]
+  name     = "${var.source_repo_name}-${var.source_repo_branch}-Pipeline"
+  role_arn = module.codepipeline_role.iam_role_arn
+  artifact_store {
+    location = aws_s3_bucket.artifact_bucket.bucket
+    type     = "S3"
+  }
 
-    stage {
-        name = "Source"
-        action {
-            name             = "Source"
-            category         = "Source"
-            owner            = "AWS"
-            version          = "1"
-            provider         = "CodeCommit"
-            output_artifacts = ["SourceOutput"]
-            run_order        = 1
-            configuration    = {
-                RepositoryName       = var.source_repo_name
-                BranchName           = var.source_repo_branch
-                PollForSourceChanges = "false"
-            }
-        }
+  stage {
+    name = "Source"
+    action {
+      name             = "Source"
+      category         = "Source"
+      owner            = "AWS"
+      version          = "1"
+      provider         = "CodeCommit"
+      output_artifacts = ["SourceOutput"]
+      run_order        = 1
+      configuration    = {
+        RepositoryName       = var.source_repo_name
+        BranchName           = var.source_repo_branch
+        PollForSourceChanges = "false"
+      }
     }
+  }
 
-    stage {
-        name = "Build"
-        action {
-            name             = "Build"
-            category         = "Build"
-            owner            = "AWS"
-            version          = "1"
-            provider         = "CodeBuild"
-            input_artifacts  = ["SourceOutput"]
-            output_artifacts = ["BuildOutput"]
-            run_order        = 1
-            configuration    = {
-                ProjectName = aws_codebuild_project.codebuild.id
-            }
-        }
+  stage {
+    name = "Build"
+    action {
+      name             = "Build"
+      category         = "Build"
+      owner            = "AWS"
+      version          = "1"
+      provider         = "CodeBuild"
+      input_artifacts  = ["SourceOutput"]
+      output_artifacts = ["BuildOutput"]
+      run_order        = 2
+      configuration    = {
+        ProjectName = aws_codebuild_project.codebuild.id
+      }
     }
+  }
+}
+
+module "trigger_role" {
+  source     = "../iam"
+  name       = "trigger-execution"
+  identifier = "events.amazonaws.com"
+  policy     = aws_iam_policy.trigger_policy.policy
+}
+
+resource "aws_iam_policy" "trigger_policy" {
+  description = "Policy to allow rule to invoke pipeline"
+  policy      = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "codepipeline:StartPipelineExecution"
+      ],
+      "Effect": "Allow",
+      "Resource": "${aws_codepipeline.pipeline.arn}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_cloudwatch_event_rule" "trigger_rule" {
+  description   = "Trigger the pipeline on change to repo/branch"
+  event_pattern = <<PATTERN
+{
+  "source": [ "aws.codecommit" ],
+  "detail-type": [ "CodeCommit Repository State Change" ],
+  "resources": [ "${aws_codecommit_repository.source_repo.arn}" ],
+  "detail": {
+    "event": [ "referenceCreated", "referenceUpdated" ],
+    "referenceType": [ "branch" ],
+    "referenceName": [ "${var.source_repo_branch}" ]
+  }
+}
+PATTERN
+  role_arn      = module.trigger_role.iam_role_arn
+  is_enabled    = true
+}
+
+resource "aws_cloudwatch_event_target" "target_pipeline" {
+  rule      = aws_cloudwatch_event_rule.trigger_rule.name
+  arn       = aws_codepipeline.pipeline.arn
+  role_arn  = module.trigger_role.iam_role_arn
+  target_id = "${var.source_repo_name}-${var.source_repo_branch}-pipeline"
 }
 
 output "pipeline_url" {
-    value = "https://console.aws.amazon.com/codepipeline/home?region=${var.aws_region}#/view/${aws_codepipeline.pipeline.id}"
+  value = "https://console.aws.amazon.com/codepipeline/home?region=${var.aws_region}#/view/${aws_codepipeline.pipeline.id}"
 }

@@ -1,13 +1,14 @@
 variable "codebuild_cache_bucket_name" {}
 variable "aws_region" {}
 variable "family" {}
+
 # --------------------------------
 # Code Build
 # --------------------------------
 data "aws_caller_identity" "current" {}
 
 module "codebuild_execution_role" {
-  source     = "../../modules/iam"
+  source     = "../../iam"
   name       = "codebuildExecution"
   identifier = "codebuild.amazonaws.com"
   policy     = aws_iam_policy.codebuild_policy.policy
@@ -99,6 +100,10 @@ resource "aws_codebuild_project" "codebuild" {
     environment_variable {
       name  = "CONTAINER_NAME"
       value = var.family
+    }
+    environment_variable {
+      name  = "CODECOMMIT_BRANCH"
+      value = var.source_repo_branch
     }
   }
   source {

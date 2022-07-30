@@ -1,12 +1,22 @@
-module "aws_cicd" {
-  source                      = "../../modules/cicd"
-  image_tag_mutability        = "IMMUTABLE"
+module "aws_petclinic_ecr" {
+  source               = "../../modules/cicd/ecr"
+  image_repo_name      = var.image_repo_name
+  image_tag_mutability = "MUTABLE"
+}
+
+module "aws_code_resources" {
+  source                      = "../../modules/cicd/code"
+  source_repo_name            = var.source_repo_name
   codebuild_cache_bucket_name = var.codebuild_cache_bucket_name
   aws_region                  = var.aws_region
   family                      = var.family
-  source_repo_name            = var.source_repo_name
-  source_repo_branch          = var.source_repo_branch
-  image_repo_name             = var.image_repo_name
+}
+
+module "aws_cicd_for_master" {
+  source             = "../../modules/cicd"
+  source_repo        = module.aws_code_resources.source_repo
+  source_repo_branch = var.source_repo_branch # master
+  depends_on         = [module.aws_code_resources]
 }
 
 data "aws_caller_identity" "current" {}
