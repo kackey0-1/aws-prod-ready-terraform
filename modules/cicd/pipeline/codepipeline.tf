@@ -154,7 +154,7 @@ resource "aws_cloudwatch_event_target" "target_pipeline" {
   rule      = aws_cloudwatch_event_rule.trigger_rule.name
   arn       = aws_codepipeline.pipeline.arn
   role_arn  = module.trigger_role.iam_role_arn
-  target_id = "${var.source_repo_name}-${var.target_repo_branch}-pipeline"
+  target_id = "${var.source_repo_name}-${var.target_repo_branch}"
 }
 
 output "pipeline_url" {
