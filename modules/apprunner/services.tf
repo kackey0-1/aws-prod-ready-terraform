@@ -48,7 +48,7 @@ resource "aws_apprunner_service" "service" {
 module "apprunner_service_role" {
   source     = "../../modules/iam"
   name       = "${var.apprunner-service-role}AppRunnerECRAccessRole"
-  identifier = "ecs-tasks.amazonaws.com"
+  identifier = "build.apprunner.amazonaws.com"
   policy     = aws_iam_policy.apprunner-policy.policy
 }
 
