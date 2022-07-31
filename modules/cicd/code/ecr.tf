@@ -12,8 +12,8 @@ resource "aws_ecr_repository" "default" {
 
 data "aws_ecr_repository" "image_repo" {
   name = var.image_repo_name
+}
 
-  depends_on = [
-    aws_ecr_repository.default
-  ]
+output "aws_ecr_repository_url" {
+  value = data.aws_ecr_repository.image_repo.repository_url
 }
