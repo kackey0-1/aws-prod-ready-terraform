@@ -30,7 +30,7 @@ resource "aws_apprunner_service" "service" {
           "spring.datasource.url" : "jdbc:mysql://${var.aws_db_instance_address}/${var.db_name}"
         }
       }
-      image_identifier      = "${var.aws_ecr_repository_url}:latest"
+      image_identifier      = "${var.aws_ecr_repository_url}:master-cd41ee8"
       image_repository_type = "ECR"
     }
   }
