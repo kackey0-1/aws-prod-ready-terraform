@@ -5,7 +5,7 @@ variable "private_subnet_cidr_az_a_0" {}
 variable "private_subnet_cidr_az_c_0" {}
 
 #vpc
-resource "aws_vpc" "hypo-driven" {
+resource "aws_vpc" "main_vpc" {
   cidr_block = var.vpc_cidr
   enable_dns_support = true
   enable_dns_hostnames = true
@@ -18,26 +18,26 @@ resource "aws_vpc" "hypo-driven" {
 #public subnet
 resource "aws_subnet" "public_az_a_0" {
   cidr_block = var.public_subnet_cidr_az_a_0
-  vpc_id = aws_vpc.hypo-driven.id
+  vpc_id = aws_vpc.main_vpc.id
   map_public_ip_on_launch = true
   availability_zone = "ap-northeast-1a"
 }
 
 resource "aws_subnet" "public_az_c_0" {
   cidr_block = var.public_subnet_cidr_az_c_0
-  vpc_id = aws_vpc.hypo-driven.id
+  vpc_id = aws_vpc.main_vpc.id
   availability_zone = "ap-northeast-1c"
   map_public_ip_on_launch = true
 }
 
 #internet gateway
 resource "aws_internet_gateway" "hypo-driven" {
-  vpc_id = aws_vpc.hypo-driven.id
+  vpc_id = aws_vpc.main_vpc.id
 }
 
 #public routetable
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.hypo-driven.id
+  vpc_id = aws_vpc.main_vpc.id
 }
 
 resource "aws_route" "public" {
@@ -59,25 +59,25 @@ resource "aws_route_table_association" "public_az_c_0" {
 #private subnet
 resource "aws_subnet" "private_az_a_0" {
   cidr_block = var.private_subnet_cidr_az_a_0
-  vpc_id = aws_vpc.hypo-driven.id
+  vpc_id = aws_vpc.main_vpc.id
   availability_zone = "ap-northeast-1a"
   map_public_ip_on_launch = false
 }
 
 resource "aws_subnet" "private_az_c_0" {
   cidr_block = var.private_subnet_cidr_az_c_0
-  vpc_id = aws_vpc.hypo-driven.id
+  vpc_id = aws_vpc.main_vpc.id
   availability_zone = "ap-northeast-1c"
   map_public_ip_on_launch = false
 }
 
 #private routetable
 resource "aws_route_table" "private_az_a_0" {
-  vpc_id = aws_vpc.hypo-driven.id
+  vpc_id = aws_vpc.main_vpc.id
 }
 
 resource "aws_route_table" "private_az_c_0" {
-  vpc_id = aws_vpc.hypo-driven.id
+  vpc_id = aws_vpc.main_vpc.id
 }
 
 resource "aws_route" "private_0" {
@@ -127,7 +127,7 @@ resource "aws_nat_gateway" "nat_gateway_1" {
 }
 
 output "vpc_id" {
-  value = aws_vpc.hypo-driven.id
+  value = aws_vpc.main_vpc.id
 }
 
 output "public_subnet_ids" {
@@ -145,5 +145,5 @@ output "private_subnet_ids" {
 }
 
 output "vpc_cidr" {
-  value = aws_vpc.hypo-driven.cidr_block
+  value = aws_vpc.main_vpc.cidr_block
 }
