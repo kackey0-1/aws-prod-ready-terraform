@@ -12,5 +12,5 @@ output "source_repo_arn" {
 }
 
 output "source_repo_name" {
-  value = aws_codecommit_repository.source_repo.arn
+  value = aws_codecommit_repository.source_repo.repository_name
 }
