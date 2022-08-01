@@ -32,7 +32,10 @@ module "aws_vpc" {
 module "aws_rds" {
   source           = "../../modules/rds/single"
   vpc_id           = module.aws_vpc.vpc_id
-  app_cidr_blocks  = ["10.0.1.0/24", "10.0.2.0/24"]
+  app_cidr_blocks  = [
+    "10.0.1.0/24",
+    "10.0.2.0/24"
+  ]
   db_subnet_groups = [
     module.aws_vpc.public_subnet_ids.public_subnet_0,
     module.aws_vpc.public_subnet_ids.public_subnet_1,
