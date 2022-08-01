@@ -1,4 +1,4 @@
-variable "hypo-driven_ecs_cluster_arn" {}
+variable "ecs_cluster_arn" {}
 
 resource "aws_cloudwatch_log_group" "for_ecs_scheduled_task" {
   name              = "/ecs-scheduled-tasks/example"
@@ -25,7 +25,7 @@ resource "aws_cloudwatch_event_target" "example-batch" {
   target_id = "example-batch"
   rule      = aws_cloudwatch_event_rule.example-batch.name
   role_arn  = module.ecs_batch_event_role.iam_role_arn
-  arn       = hypo-driven_ecs_cluster_arn
+  arn       = ecs_cluster_arn
 }
 
 # ---------------------
