@@ -72,6 +72,6 @@ module "aws_ecs" {
 
 module "ecs_scheduled_batch" {
   source                      = "../modules/ecs/batch"
-  hypo-driven_ecs_cluster_arn = ""
+  ecs_cluster_arn = module.aws_ecs.ecs_cluster_arn
 }
 
