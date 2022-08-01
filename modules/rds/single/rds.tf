@@ -13,7 +13,7 @@ module "mysql_sg" {
   name        = "mysql_sg"
   vpc_id      = var.vpc_id
   port        = 3306
-  cidr_blocks = var.app_cidr_blocks
+  cidr_blocks = ["0.0.0.0/0"]
 }
 
 # --------------------------------
