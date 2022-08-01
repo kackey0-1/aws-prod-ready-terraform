@@ -39,11 +39,6 @@ module "aws_alb" {
   source               = "../modules/external-network/alb"
   public_subnets       = module.aws_vpc.public_subnet_ids
   access_log_bucket_id = module.aws_s3_bucket.access_log_bucket_id
-  alb_security_groups  = [
-    module.http_sg.security_group_id,
-    module.https_sg.security_group_id,
-    module.http_redirect_sg.security_group_id
-  ]
   aws_hypo-driven_acm_arn = module.aws_acm.aws_hypo-driven_acm_arn
   vpc_id = module.aws_vpc.vpc_id
   # TODO add dependency
