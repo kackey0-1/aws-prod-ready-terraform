@@ -1,8 +1,7 @@
+variable "vpc_id" {}
 variable "public_subnets" {}
 variable "access_log_bucket_id" {}
-variable "alb_security_groups" {}
 variable "aws_hypo-driven_acm_arn" {}
-variable "vpc_id" {}
 
 resource "aws_alb" "hypo-driven" {
   name                             = "hypo-driven"
@@ -21,56 +20,83 @@ resource "aws_alb" "hypo-driven" {
     enabled = true
   }
 
-  security_groups = var.alb_security_groups
+  security_groups = [
+    module.http_sg.security_group_id,
+    module.https_sg.security_group_id,
+    module.http_redirect_sg.security_group_id
+  ]
 }
 
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_alb.hypo-driven.arn
-  port = 443
-  protocol = "HTTPS"
-  certificate_arn = var.aws_hypo-driven_acm_arn
+  port              = 443
+  protocol          = "HTTPS"
+  certificate_arn   = var.aws_hypo-driven_acm_arn
   default_action {
     type = "fixed-response"
     fixed_response {
       content_type = "text/plain"
       message_body = "this is HTTPS response"
-      status_code = "200"
+      status_code  = "200"
     }
   }
 }
 
 resource "aws_alb_listener" "redirect_http_to_https" {
   load_balancer_arn = aws_alb.hypo-driven.arn
-  port = 8080
-  protocol = "HTTP"
+  port              = 8080
+  protocol          = "HTTP"
   default_action {
     type = "redirect"
     redirect {
-      port = 443
-      protocol = "HTTPS"
+      port        = 443
+      protocol    = "HTTPS"
       status_code = "HTTP_301"
     }
   }
+}
 
+module "http_sg" {
+  source      = "../../internal-network/security_group"
+  name        = "http_sg"
+  vpc_id      = var.vpc_id
+  port        = 80
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+module "https_sg" {
+  source      = "../../internal-network/security_group"
+  name        = "https_sg"
+  vpc_id      = var.vpc_id
+  port        = 443
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+module "http_redirect_sg" {
+  source      = "../../internal-network/security_group"
+  name        = "http_redirect_sg"
+  vpc_id      = var.vpc_id
+  port        = 8080
+  cidr_blocks = ["0.0.0.0/0"]
 }
 
 resource "aws_lb_target_group" "target_to_ecs" {
-  name = "hypo-driven"
-  target_type = "ip"
-  vpc_id = var.vpc_id
-  port = 80
-  protocol = "HTTP"
+  name                 = "hypo-driven"
+  target_type          = "ip"
+  vpc_id               = var.vpc_id
+  port                 = 80
+  protocol             = "HTTP"
   deregistration_delay = 300
 
   health_check {
-    path = "/"
-    healthy_threshold = 5
+    path                = "/"
+    healthy_threshold   = 5
     unhealthy_threshold = 2
-    timeout = 5
-    interval = 30
-    matcher = 200
-    port = "traffic-port"
-    protocol = "HTTP"
+    timeout             = 5
+    interval            = 30
+    matcher             = 200
+    port                = "traffic-port"
+    protocol            = "HTTP"
   }
 
   depends_on = [aws_alb.hypo-driven]
@@ -78,10 +104,10 @@ resource "aws_lb_target_group" "target_to_ecs" {
 
 resource "aws_lb_listener_rule" "hypo-driven" {
   listener_arn = aws_lb_listener.https.arn
-  priority = 100
+  priority     = 100
 
   action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.target_to_ecs.arn
   }
 
@@ -94,8 +120,8 @@ resource "aws_lb_listener_rule" "hypo-driven" {
 
 output "hypo-driven_alb" {
   value = {
-    hypo-driven_alb_name    = aws_alb.hypo-driven.dns_name
-    hypo-driven_alb_zone_id = aws_alb.hypo-driven.zone_id
+    hypo-driven_alb_name             = aws_alb.hypo-driven.dns_name
+    hypo-driven_alb_zone_id          = aws_alb.hypo-driven.zone_id
     hypo-driven_alb_target_group_arn = aws_lb_target_group.target_to_ecs.arn
   }
 }

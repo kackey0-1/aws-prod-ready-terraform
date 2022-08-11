@@ -4,7 +4,7 @@ variable "vpc_id" {}
 variable "vpc_cidr" {}
 
 # cluster
-resource "aws_ecs_cluster" "hypo-driven" {
+resource "aws_ecs_cluster" "esc_cluster" {
   name = "hypo-driven"
 }
 
@@ -21,7 +21,7 @@ resource "aws_ecs_task_definition" "hypo-driven" {
 # ecs_service
 resource "aws_ecs_service" "hypo-driven" {
   name = "hypo-driven"
-  cluster = aws_ecs_cluster.hypo-driven.arn
+  cluster = aws_ecs_cluster.esc_cluster.arn
   task_definition = aws_ecs_task_definition.hypo-driven.arn
   desired_count = 2
   launch_type = "FARGATE"
@@ -54,4 +54,8 @@ module "nginx_sg" {
   vpc_id = var.vpc_id
   port = 80
   cidr_blocks = [var.vpc_cidr]
+}
+
+output "ecs_cluster_arn" {
+  value = aws_ecs_cluster.esc_cluster.arn
 }
